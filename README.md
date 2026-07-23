@@ -11,7 +11,7 @@ The build is a multi-target Dockerfile:
 
 ## Usage
 
-Builds default to Ubuntu 24.04. Use `--ubuntu-26.04` to build on Ubuntu 26.04.
+Builds use Ubuntu 26.04.
 
 ```sh
 run/build.sh --help
@@ -21,13 +21,23 @@ run/build.sh --hhvm-ref hhvm-oss-20260605 --docker-tag 26.06.05
 ## Publishing
 
 Publishing is separate from building and only operates on already-built local
-images:
+images. Source and explicit destination tags are used exactly as passed to
+`--from` and `--to`:
 
 ```sh
 run/publish.sh --from 26.06.05 --to 26.06.05
-run/publish.sh --from 26.06.05 --to-beta --ubuntu-26.04
+run/publish.sh --from 26.06.05 --to-beta
 run/publish.sh --from 26.06.05 --to 26.06.05 --docker-user yourdockerusername
 ```
+
+### Beta tags
+
+The `beta-resolute` tag was published by mistake. It is now maintained as an
+alias for `beta` so that users who adopted it can continue to pull updates.
+Publishing a beta updates both tags to the same image.
+
+`beta-resolute` will stop receiving updates when the build target moves to
+Ubuntu 28.04 or another platform. Use `beta` for the continuing beta channel.
 
 ## See Also
 

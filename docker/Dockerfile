@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-ARG UBUNTU_IMAGE=ubuntu:noble
+ARG UBUNTU_IMAGE=ubuntu:resolute
 
 FROM ${UBUNTU_IMAGE} AS package
 
@@ -8,9 +8,9 @@ ARG HHVM_REPO=https://github.com/hershel-theodore-layton/hhvm.git
 ARG HHVM_REF=hhvm-oss-20260605
 ARG IS_NIGHTLY=
 ARG JOBS=
-ARG DISTRO=ubuntu-24.04-noble
+ARG DISTRO=ubuntu-26.04-resolute
 ARG LLVM_VERSION=20
-ARG HHVM_BUILD_FLAG=
+ARG HHVM_BUILD_FLAG=--ubuntu-26.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     HHVM_DISABLE_NUMA=true \

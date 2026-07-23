@@ -14,7 +14,6 @@ Options:
 
   --docker-user USER    Docker repository namespace. Default: hersheltheodorelayton.
   --repo URL            HHVM git repository URL. Default: https://github.com/hershel-theodore-layton/hhvm.git
-  --ubuntu-26.04        Build on Ubuntu 26.04 instead of 24.04 and append.
   --single-threaded     Compile with one thread to make build output easier to read.
   --nightly             Build hhvm-nightly packages. Omit for release hhvm packages.
   --builder NAME        Buildx builder name. Default: hhvm_image_builder.
@@ -35,10 +34,9 @@ out_dir="out"
 is_nightly=""
 docker_tag=""
 docker_user="hersheltheodorelayton"
-ubuntu_image="ubuntu:noble"
-distro="ubuntu-24.04-noble"
-hhvm_build_flag=""
-tag_suffix=""
+ubuntu_image="ubuntu:resolute"
+distro="ubuntu-26.04-resolute"
+hhvm_build_flag="--ubuntu-26.04"
 
 need_arg() {
   if [ "$#" -lt 2 ] || [ -z "$2" ]; then
@@ -51,13 +49,6 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --repo) need_arg "$@"; repo="$2"; shift 2 ;;
     --hhvm-ref) need_arg "$@"; ref="$2"; shift 2 ;;
-    --ubuntu-26.04)
-      ubuntu_image="ubuntu:resolute"
-      distro="ubuntu-26.04-resolute"
-      hhvm_build_flag="--ubuntu-26.04"
-      tag_suffix="-resolute"
-      shift
-      ;;
     --single-threaded) single_threaded=1; shift ;;
     --docker-tag) need_arg "$@"; docker_tag="$2"; shift 2 ;;
     --docker-user) need_arg "$@"; docker_user="$2"; shift 2 ;;
@@ -85,10 +76,6 @@ fi
 if [ -z "$docker_tag" ]; then
   echo "--docker-tag is required" >&2
   exit 2
-fi
-
-if [ -n "$tag_suffix" ] && [[ "$docker_tag" != *"$tag_suffix" ]]; then
-  docker_tag="${docker_tag}${tag_suffix}"
 fi
 
 log_file="build.$(date +%Y%m%d-%H%M%S).log"
