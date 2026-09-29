@@ -41,7 +41,7 @@ HHVM_VERSION="$(awk '
   /^# define HHVM_VERSION_MAJOR / { major = $4 }
   /^# define HHVM_VERSION_MINOR / { minor = $4 }
   /^# define HHVM_VERSION_PATCH / { patch = $4 }
-  END { if (!major || !minor || !patch) exit 1; printf "%02d.%02d.%02d\n", major, minor, patch }
+  END { if (!major || !minor || !patch) exit 1; printf "%d.%d.%d\n", major, minor, patch }
 ' hphp/runtime/version.h)"
 export HHVM_VERSION
 
