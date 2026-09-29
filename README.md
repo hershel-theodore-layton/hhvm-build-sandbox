@@ -22,7 +22,7 @@ run/build.sh --hhvm-ref hhvm-oss-20260605 --docker-tag 26.06.05
 ## Native ARM64 build
 
 On an ARM64 Docker host, run `run/build-arm64.sh`. This builds the
-`hhvm-oss-20260929-arm` HHVM branch at revision `f976f589b516884b3cac67e6a424801e7840565d`,
+`hhvm-oss-20260929-arm` HHVM branch at revision `f256e93a1a1080c4b9dc1b802ee7412c542d345a`,
 exports Debian packages to `out/arm64`, and creates
 `hhvm-basic:26.09.29-arm64` and `hhvm-full:26.09.29-arm64` locally.
 The full image uses Composer from Ubuntu and builds Watchman v2025.05.26.00
@@ -46,8 +46,9 @@ committed in HHVM itself. Reduced C/C++ debug information limits disk and
 memory use.
 
 Run `run/test-arm64.sh` to check both images with JIT enabled and disabled,
-including native `.hack` autoloading. It also checks Watchman suffix-array
-queries, Hack typechecking, Composer, and Watchman in the full image.
+including fallback autoloading with `.php` files. It also checks `.hack`
+autoloading through Watchman suffix-array queries, Hack typechecking,
+Composer, and Watchman in the full image.
 
 Run `run/test-arm64-runtime.sh` to run the HHVM quick suite in both images,
 using the interpreter and JIT. It copies tests from the retained build
@@ -60,10 +61,13 @@ For native autoloading in `basic`, pass
 `-d hhvm.autoload.db.path=/var/tmp/hhvm-autoload-%{euid}-%{schema}.db`
 and provide a project `.hhvmconfig.hdf`. The full image configures this
 database path automatically and also provides Watchman for live queries.
+As on x64, the fallback scanner recognizes `.php`, `.hck`, and `.inc`;
+`.hack` autoloading requires an appropriate Watchman query.
 
-Verified on 2026-09-30: both images report Linux ARM64 and HHVM 26.9.29.
-All 862 quick tests pass in each image under both interpreter and JIT
-(3,448 test executions). Native autoloading, Watchman suffix-array queries
+Verified on 2026-09-30 after restoring the x64 autoload scanner behavior:
+both images report Linux ARM64 and HHVM 26.9.29. All 862 quick tests pass
+in each image under both interpreter and JIT (3,448 test executions).
+Fallback autoloading with `.php`, Watchman autoloading with `.hack`
 (including as a non-root user), and Hack typechecking also pass.
 
 ## Publishing

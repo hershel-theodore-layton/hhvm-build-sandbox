@@ -17,9 +17,14 @@ for target in basic full; do
     "$image" sh -ec '
       cp -R /fixtures /tmp/autoload-test
       cd /tmp/autoload-test
+      # The fallback scanner supports .php, .hck and .inc, as on x64.
+      for source in *.hack; do
+        { printf "<?hh\n"; cat "$source"; } > "${source%.hack}.php"
+        rm "$source"
+      done
       for jit in false true; do
         hhvm -d hhvm.autoload.db.path=/tmp/autoload-test.db \
-          -vEval.Jit="$jit" -vEval.JitPGO=false main.hack
+          -vEval.Jit="$jit" -vEval.JitPGO=false main.php
       done'
 done
 # Exercise the full image defaults with a modern Watchman suffix-array query.
