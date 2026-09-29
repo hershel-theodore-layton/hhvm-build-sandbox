@@ -26,7 +26,9 @@ RUN apt-get update -y && \
 
 WORKDIR /usr/src
 
-RUN git clone --filter=blob:none --single-branch --branch "${HHVM_REF}" "${HHVM_REPO}" hhvm
+ARG HHVM_REVISION
+RUN git clone --filter=blob:none --single-branch --branch "${HHVM_REF}" "${HHVM_REPO}" hhvm && \
+    test "$(git -C hhvm rev-parse HEAD)" = "${HHVM_REVISION}"
 
 WORKDIR /usr/src/hhvm
 
@@ -37,7 +39,7 @@ HHVM_VERSION="$(awk '
   /^# define HHVM_VERSION_MAJOR / { major = $4 }
   /^# define HHVM_VERSION_MINOR / { minor = $4 }
   /^# define HHVM_VERSION_PATCH / { patch = $4 }
-  END { if (!major || !minor || !patch) exit 1; print major "." minor "." patch }
+  END { if (!major || !minor || !patch) exit 1; printf "%02d.%02d.%02d\n", major, minor, patch }
 ' hphp/runtime/version.h)"
 export HHVM_VERSION
 

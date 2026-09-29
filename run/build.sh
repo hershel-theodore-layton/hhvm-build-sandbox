@@ -94,12 +94,15 @@ docker buildx inspect "$builder" >/dev/null 2>&1 || docker buildx create \
   --driver-opt env.BUILDKIT_STEP_LOG_MAX_SPEED=-1 \
   --name "$builder" >/dev/null
 
+revision="$(git ls-remote --exit-code "$repo" "refs/heads/$ref" | awk 'NR == 1 { print $1 }')"
+
 common_args=(
   --file docker/Dockerfile
   --builder "$builder"
   --progress=plain
   --build-arg "HHVM_REPO=${repo}"
   --build-arg "HHVM_REF=${ref}"
+  --build-arg "HHVM_REVISION=${revision}"
   --build-arg "UBUNTU_IMAGE=${ubuntu_image}"
   --build-arg "DISTRO=${distro}"
   --build-arg "HHVM_BUILD_FLAG=${hhvm_build_flag}"
