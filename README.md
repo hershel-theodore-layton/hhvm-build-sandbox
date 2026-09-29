@@ -19,6 +19,32 @@ run/build.sh --help
 run/build.sh --hhvm-ref hhvm-oss-20260605 --docker-tag 26.06.05
 ```
 
+## Native ARM64 build
+
+On an ARM64 Docker host, run `run/build-arm64.sh`. This builds the
+`hhvm-oss-20260929-arm` HHVM branch at revision `f256e93a1a1080c4b9dc1b802ee7412c542d345a`,
+exports Debian packages to `out/arm64`, and creates
+`hhvm-basic:26.09.29-arm64` and `hhvm-full:26.09.29-arm64` locally.
+The full image uses Ubuntu's native ARM64 Watchman and Composer packages.
+
+The persistent `hhvm-arm64-build` container defaults to all Docker CPUs,
+15 GiB RAM, and 16 GiB combined RAM/swap. Override `JOBS`, `BUILD_CPUS`,
+`BUILD_MEMORY`, and `BUILD_MEMORY_SWAP` as needed. `CONTAINER` and `IMAGE_TAG`
+customize the container name and output tags. Docker's VM must have enough
+memory available for the selected limits.
+
+Output is saved to timestamped files in `logs/` without streaming. Read the
+log after the command finishes. Failed containers are retained; rerun to
+reuse downloaded dependencies and compiled objects. Builds are locked to
+prevent overlapping attempts in the same container. Use a fresh container
+when changing the pinned source revision. ARM portability changes are
+committed in HHVM itself. Reduced C/C++ debug information limits disk and
+memory use.
+
+Run `run/test-arm64.sh` to check both images with JIT enabled and disabled,
+and check Hack, Composer, and Watchman in the full image. These are smoke
+checks, not the full regression suite. Publishing is a separate operation.
+
 ## Publishing
 
 Publishing is separate from building and only operates on already-built local
