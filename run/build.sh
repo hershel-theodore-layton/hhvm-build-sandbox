@@ -14,6 +14,7 @@ Options:
 
   --docker-user USER    Docker repository namespace. Default: hersheltheodorelayton.
   --repo URL            HHVM git repository URL. Default: https://github.com/hershel-theodore-layton/hhvm.git
+  --jobs N              Limit build concurrency to N jobs.
   --single-threaded     Compile with one thread to make build output easier to read.
   --nightly             Build hhvm-nightly packages. Omit for release hhvm packages.
   --builder NAME        Buildx builder name. Default: hhvm_image_builder.
@@ -28,7 +29,7 @@ USAGE
 
 repo="https://github.com/hershel-theodore-layton/hhvm.git"
 ref=""
-single_threaded=""
+jobs=""
 builder="hhvm_image_builder"
 out_dir="out"
 is_nightly=""
@@ -49,7 +50,8 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     --repo) need_arg "$@"; repo="$2"; shift 2 ;;
     --hhvm-ref) need_arg "$@"; ref="$2"; shift 2 ;;
-    --single-threaded) single_threaded=1; shift ;;
+    --jobs) need_arg "$@"; jobs="$2"; shift 2 ;;
+    --single-threaded) jobs=1; shift ;;
     --docker-tag) need_arg "$@"; docker_tag="$2"; shift 2 ;;
     --docker-user) need_arg "$@"; docker_user="$2"; shift 2 ;;
     --nightly) is_nightly=1; shift ;;
@@ -78,6 +80,11 @@ if [ -z "$docker_tag" ]; then
   exit 2
 fi
 
+if [ -n "$jobs" ] && ! [[ "$jobs" =~ ^[1-9][0-9]*$ ]]; then
+  echo "--jobs must be a positive integer" >&2
+  exit 2
+fi
+
 log_file="build.$(date +%Y%m%d-%H%M%S).log"
 exec > >(tee "$log_file") 2>&1
 echo "Logging build output to ${log_file}"
@@ -99,8 +106,8 @@ common_args=(
   --build-arg "IS_NIGHTLY=${is_nightly}"
 )
 
-if [ -n "$single_threaded" ]; then
-  common_args+=(--build-arg "JOBS=1")
+if [ -n "$jobs" ]; then
+  common_args+=(--build-arg "JOBS=${jobs}")
 fi
 build_artifacts() {
   mkdir -p "$out_dir"
