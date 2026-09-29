@@ -32,7 +32,7 @@ RUN git clone --filter=blob:none --single-branch --branch "${HHVM_REF}" "${HHVM_
 
 WORKDIR /usr/src/hhvm
 
-RUN <<'EOF'
+RUN --mount=type=cache,id=hhvm-resolute-deps,target=/usr/src/hhvm-deps <<'EOF'
 set -e
 
 HHVM_VERSION="$(awk '

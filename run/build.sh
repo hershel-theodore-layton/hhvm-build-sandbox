@@ -94,7 +94,12 @@ docker buildx inspect "$builder" >/dev/null 2>&1 || docker buildx create \
   --driver-opt env.BUILDKIT_STEP_LOG_MAX_SPEED=-1 \
   --name "$builder" >/dev/null
 
-revision="$(git ls-remote --exit-code "$repo" "refs/heads/$ref" | awk 'NR == 1 { print $1 }')"
+revision="$(git ls-remote --exit-code "$repo" "refs/heads/$ref" "refs/tags/$ref" "refs/tags/$ref^{}" | awk '
+  /refs\/heads\// { branch = $1 }
+  /refs\/tags\/.*\^\{\}$/ { peeled = $1 }
+  /refs\/tags\// { if (!tag) tag = $1 }
+  END { print branch ? branch : (peeled ? peeled : tag) }
+')"
 
 common_args=(
   --file docker/Dockerfile
