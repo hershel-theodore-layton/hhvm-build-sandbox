@@ -89,7 +89,13 @@ log_file="build.$(date +%Y%m%d-%H%M%S).log"
 exec > >(tee "$log_file") 2>&1
 echo "Logging build output to ${log_file}"
 
+driver_args=(--driver-opt memory=12g --driver-opt memory-swap=14g)
+if [ -n "$jobs" ]; then
+  driver_args+=(--driver-opt cpu-period=100000 --driver-opt "cpu-quota=$((jobs * 100000))")
+fi
+
 docker buildx inspect "$builder" >/dev/null 2>&1 || docker buildx create \
+  "${driver_args[@]}" \
   --driver-opt env.BUILDKIT_STEP_LOG_MAX_SIZE=-1 \
   --driver-opt env.BUILDKIT_STEP_LOG_MAX_SPEED=-1 \
   --name "$builder" >/dev/null

@@ -11,7 +11,8 @@ The build is a multi-target Dockerfile:
 
 ## Usage
 
-Builds use Ubuntu 26.04.
+Builds use Ubuntu 26.04. New builders are limited to 12 GiB RAM and 2 GiB swap.
+Use `--jobs 4` to limit compilation to four jobs and new builders to four CPUs.
 
 ```sh
 run/build.sh --help
