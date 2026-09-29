@@ -22,10 +22,14 @@ run/build.sh --hhvm-ref hhvm-oss-20260605 --docker-tag 26.06.05
 ## Native ARM64 build
 
 On an ARM64 Docker host, run `run/build-arm64.sh`. This builds the
-`hhvm-oss-20260929-arm` HHVM branch at revision `f256e93a1a1080c4b9dc1b802ee7412c542d345a`,
+`hhvm-oss-20260929-arm` HHVM branch at revision `f976f589b516884b3cac67e6a424801e7840565d`,
 exports Debian packages to `out/arm64`, and creates
 `hhvm-basic:26.09.29-arm64` and `hhvm-full:26.09.29-arm64` locally.
-The full image uses Ubuntu's native ARM64 Watchman and Composer packages.
+The full image uses Composer from Ubuntu and builds Watchman v2025.05.26.00
+from pinned source for native ARM64 support, including suffix-array autoload
+queries unsupported by Ubuntu's older Watchman package. Its bundled libraries
+stay private under `/opt/watchman`, avoiding the system-library conflicts
+discussed in [Watchman PR #1340](https://github.com/facebook/watchman/pull/1340).
 
 The persistent `hhvm-arm64-build` container defaults to all Docker CPUs,
 15 GiB RAM, and 16 GiB combined RAM/swap. Override `JOBS`, `BUILD_CPUS`,
@@ -42,8 +46,25 @@ committed in HHVM itself. Reduced C/C++ debug information limits disk and
 memory use.
 
 Run `run/test-arm64.sh` to check both images with JIT enabled and disabled,
-and check Hack, Composer, and Watchman in the full image. These are smoke
-checks, not the full regression suite. Publishing is a separate operation.
+including native `.hack` autoloading. It also checks Watchman suffix-array
+queries, Hack typechecking, Composer, and Watchman in the full image.
+
+Run `run/test-arm64-runtime.sh` to run the HHVM quick suite in both images,
+using the interpreter and JIT. It copies tests from the retained build
+container into a case-sensitive Docker volume and runs them as a non-root
+user so permission tests behave correctly. Output goes to `logs/`; failed
+test containers are retained for diagnosis. These checks do not cover the
+full HHVM regression suite. Publishing is a separate operation.
+
+For native autoloading in `basic`, pass
+`-d hhvm.autoload.db.path=/var/tmp/hhvm-autoload-%{euid}-%{schema}.db`
+and provide a project `.hhvmconfig.hdf`. The full image configures this
+database path automatically and also provides Watchman for live queries.
+
+Verified on 2026-09-30: both images report Linux ARM64 and HHVM 26.9.29.
+All 862 quick tests pass in each image under both interpreter and JIT
+(3,448 test executions). Native autoloading, Watchman suffix-array queries
+(including as a non-root user), and Hack typechecking also pass.
 
 ## Publishing
 

@@ -14,7 +14,7 @@ if [ ! -d hhvm/.git ]; then
   git clone --depth=1 --single-branch --branch hhvm-oss-20260929-arm https://github.com/hershel-theodore-layton/hhvm.git
 fi
 cd hhvm
-test "$(git rev-parse HEAD)" = f256e93a1a1080c4b9dc1b802ee7412c542d345a
+test "$(git rev-parse HEAD)" = f976f589b516884b3cac67e6a424801e7840565d
 # Recover an interrupted initial checkout after a Docker restart.
 if [ ! -f hphp/runtime/version.h ]; then
   git reset --hard HEAD

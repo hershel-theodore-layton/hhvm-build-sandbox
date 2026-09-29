@@ -1,0 +1,7 @@
+--- a/configure.py
++++ b/configure.py
+@@ -25,3 +25,3 @@
+ import os
+-import pipes
++import shlex as pipes
+ import string

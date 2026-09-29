@@ -10,7 +10,7 @@ tag=${IMAGE_TAG:-26.09.29-arm64}
 mkdir -p logs out/arm64
 log="logs/build-arm64-$(date +%Y%m%d-%H%M%S).log"
 echo "Build output: $PWD/$log (read after the command finishes)"
-trap 'status=$?; echo "Build failed (exit $status). Read $PWD/$log; container $container is retained." >&2; exit "$status"' ERR
+trap 'build_result=$?; echo "Build failed (exit $build_result). Read $PWD/$log; container $container is retained." >&2; exit "$build_result"' ERR
 # Keep an idle container alive; docker exec can change JOBS on every retry.
 if docker container inspect "$container" >/dev/null 2>&1; then
   if [ "$(docker inspect --format '{{.Config.Cmd}}' "$container")" != '[sleep infinity]' ]; then
@@ -29,6 +29,8 @@ fi
 # flock also prevents overlapping builds against the retained source tree.
 docker exec -e "JOBS=$jobs" "$container" \
   flock -n /tmp/hhvm-build.lock bash /scripts/build-container.sh >> "$log" 2>&1
+docker exec -e "JOBS=$jobs" "$container" \
+  flock -n /tmp/hhvm-build.lock bash /scripts/build-watchman.sh >> "$log" 2>&1
 for target in basic full; do
   docker buildx build --platform linux/arm64 --file arm64/Dockerfile \
     --target "$target" --tag "hhvm-$target:$tag" --load . >> "$log" 2>&1

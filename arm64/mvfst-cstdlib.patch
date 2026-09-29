@@ -1,0 +1,6 @@
+--- a/quic/common/third-party/optional.h
++++ b/quic/common/third-party/optional.h
+@@ -33,2 +33,3 @@
+ #include <cassert>
++#include <cstdlib>
+ #include <climits>
